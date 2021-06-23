@@ -1,0 +1,38 @@
+public class Human : MonoBehaviour
+{
+    [SerializeField]
+    public float speed;
+    public int immunityStats;
+    public PlayerCondition pC;
+
+    [SerializeField]
+    private Vector3 minDimensions;
+    private Vector3 maxDimensions;
+    private Vector3 destination;
+    void OnEnable()
+    {
+        immunityStats = Random.Range(0, 150);
+    }
+    void Start()
+    {
+        pC = GameObject.FindGameObjectWithTag("human").GetComponent<PlayerCondition>();
+        minDimensions = Camera.main.ScreenToWorldPoint(new Vector3(0, 0));
+        maxDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
+        destination = new Vector3(Random.Range(minDimensions.x, maxDimensions.x), Random.Range(minDimensions.y, maxDimensions.y), 0f);
+    }
+    void Update()
+    {
+        gameObject.transform.position = Vector3.MoveTowards(gameObject.transform.position, destination, speed * Time.deltaTime);
+        if (Vector3.Distance(gameObject.transform.position, destination) < 0.2f)
+        {
+            setNewDestination();
+        }
+
+    }
+
+     void setNewDestination()
+     {
+         destination = new Vector3(Random.Range(minDimensions.x, maxDimensions.x), Random.Range(minDimensions.y, maxDimensions.y), 0f);
+     } 
+
+}
