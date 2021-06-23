@@ -1,0 +1,181 @@
+public class Manager : MonoBehaviour
+{
+    [SerializeField]
+    public Text txtPopulation;
+    public Text txtHealthy;
+    public Text txtInfected;
+    public Text txtCured;
+    public Text txtDeath;
+    public Text txtTimer;
+
+    public Text fTxtPopulation;
+    public Text fTxtHealthy;
+    public Text fTxtInfected;
+    public Text fTxtCured;
+    public Text fTxtDeath;
+
+
+    [SerializeField]
+    public PlayerCondition pC;
+    private GameObject human;
+    public GameObject timerUp;
+    public GameObject stats;
+    public Transfer tF;
+
+    [SerializeField]
+    private Vector3 minSpawnD;
+    private Vector3 maxSpawnD;
+
+    [SerializeField]
+    public GameObject humanPrefab = null;
+    public GameObject infectedPrefab;
+
+    [SerializeField]
+    public int populationAmount;
+    public static int healthyCount;
+    public static int infectedCount;
+    public static int curedCount;
+    public static float vaccineTimer = 90f;
+    public static int deathCount;
+    public static int fPopulationAmt;
+    public bool runTimer = false;
+    public static int spawnInfected;
+
+
+
+
+    void Start()
+    {
+        //txtPopulation = GetComponent<Text>();
+        //txtHealthy = GetComponent<Text>();
+        //txtInfected = GetComponent<Text>();
+        //txtCured = GetComponent<Text>();
+        runTimer = true;
+
+    }
+
+    void OnEnable()
+    {
+        populationAmount = Transfer.humanToSpawn;
+        spawnInfected = Random.Range(1, 3);
+        minSpawnD = Camera.main.ScreenToWorldPoint(new Vector3(0, 00));
+        maxSpawnD = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
+
+        GameObject[] population = GameObject.FindGameObjectsWithTag("human");
+
+        int totalPopulation = populationAmount + spawnInfected;
+
+        healthyCount = populationAmount;
+        fPopulationAmt = (totalPopulation + spawnInfected);
+        infectedCount = infectedCount + spawnInfected;
+        txtPopulation.text = "Total Human: " + totalPopulation;
+        txtHealthy.text = "Healthy: " + healthyCount;
+        txtInfected.text = "Infected: " + infectedCount;
+        txtCured.text = "Cured: " + curedCount;
+        txtDeath.text = "Death: " + deathCount;
+        txtTimer.text = "Vaccine Timer: " + vaccineTimer;
+
+        for (int i = 0; i < populationAmount; ++i)
+        {
+            human = Instantiate(humanPrefab,
+                new Vector3(Random.Range(minSpawnD.x, maxSpawnD.x),
+                    Random.Range(minSpawnD.y, maxSpawnD.y), 0), Quaternion.identity);
+           
+        }
+        for (int i = 0; i < spawnInfected; i++)
+        {
+            Instantiate(infectedPrefab, new Vector3(Random.Range(minSpawnD.x, maxSpawnD.x),
+                    Random.Range(minSpawnD.y, maxSpawnD.y), 0), Quaternion.identity);
+        }
+       
+
+    }
+
+    void Update()
+    {
+        //if(pC.isInfected == true)
+        //{
+        //    //healthyCount = healthyCount - 1;
+        //    //infectedCount = infectedCount + 1;
+        //    txtHealthy.text = "Healthy: " + healthyCount;
+        //    txtInfected.text = "Infected: " + infectedCount;
+        //    Debug.Log("HELLO");
+        //}
+
+        if(runTimer)
+        {
+            if(vaccineTimer > 0)
+            {
+                vaccineTimer -= Time.deltaTime;
+                VaccineCountdown(vaccineTimer);
+            }
+            else
+            {
+                vaccineTimer = 0;
+                runTimer = false;
+            }
+        }
+
+        if(vaccineTimer == 0)
+        {
+            PauseGame();
+            stats.SetActive(false); 
+            timerUp.SetActive(true);
+            FinalStats();
+        }
+
+    }
+
+    public void IncrementInfected()
+    {
+        healthyCount = healthyCount - 1;
+        infectedCount = infectedCount + 1;
+        txtHealthy.text = "Healthy: " + healthyCount;
+        txtInfected.text = "Infected: " + infectedCount;
+    }
+
+    public void IncrementDead()
+    {
+        infectedCount = infectedCount - 1;
+        deathCount = deathCount + 1;
+        txtInfected.text = "Infected: " + infectedCount;
+        txtDeath.text = "Death: " + deathCount;
+
+    }
+    public void IncrementCured()
+    {
+        infectedCount = infectedCount - 1;
+        curedCount = curedCount + 1;
+        txtInfected.text = "Infected: " + infectedCount;
+        txtCured.text = "Cured: " + curedCount;
+    }
+
+    public void VaccineCountdown(float TimerDisplay)
+    {
+        TimerDisplay += 1;
+
+        float minutes = Mathf.FloorToInt(vaccineTimer / 60);
+        float seconds = Mathf.FloorToInt(vaccineTimer % 60);
+
+        txtTimer.text = string.Format("Vaccine Timer: {0:00}:{1:00}", minutes, seconds);
+    }
+
+    public void FinalStats()
+    {
+        fTxtPopulation.text = "Total Human: " + fPopulationAmt;
+        fTxtInfected.text = "Total Infected: " + infectedCount;
+        fTxtDeath.text = "Total Death: " + deathCount;
+        fTxtCured.text = "Total Cured: " + curedCount;
+        fTxtHealthy.text = "Total Healthy " + healthyCount;
+    }
+
+    void PauseGame()
+    {
+        Time.timeScale = 0;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+}
