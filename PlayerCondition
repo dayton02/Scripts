@@ -1,0 +1,185 @@
+public class PlayerCondition : MonoBehaviour
+{
+    [SerializeField]
+    public bool isHealthy;
+    public bool isCured;
+    public bool isInfected;
+    public bool isDead;
+    public bool canBeInfected;
+
+    [SerializeField]
+    public SpriteRenderer rend;
+    public Color colourInfected;
+    public Color colourCured;
+    public Manager mG;
+    public Human hM;
+
+    [SerializeField]
+    public GameObject deadIcon;
+
+    void Start()
+    {
+        canBeInfected = true;
+        rend = GetComponent<SpriteRenderer>();
+        mG = GameObject.FindGameObjectWithTag("Manager").GetComponent<Manager>();
+        hM = GameObject.FindGameObjectWithTag("human").GetComponent<Human>();
+    }
+
+    void Update()
+    {
+
+        if (isHealthy == false && canBeInfected == true)
+        {
+            if (!isInfected)
+                mG.IncrementInfected();
+            isInfected = true;
+
+        }
+
+        if (isInfected == true)
+        {
+            rend.color = colourInfected;
+
+        }
+        if (isDead == true)
+        {
+            Death();
+        }
+        if (isHealthy == true && isInfected == false && canBeInfected == false)
+        {
+            if (!isCured)
+                Cured();
+            isCured = true;
+        }
+
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        GameObject target = col.gameObject;
+        if (target.CompareTag("human") && this.isInfected == true)
+        {
+            if(target.GetComponent<Human>().immunityStats >= 0 && target.GetComponent<Human>().immunityStats <= 50 && target.GetComponent<PlayerCondition>().isInfected == false)
+            {
+         
+                StartCoroutine(InfectedCDWeak());
+                IEnumerator InfectedCDWeak()
+                {
+                    yield return new WaitForSeconds(5);
+                    target.GetComponent<PlayerCondition>().isHealthy = false;
+                }
+                //target.GetComponent<PlayerCondition>().isHealthy = false;
+
+
+            }
+            if(target.GetComponent<Human>().immunityStats >  50 && target.GetComponent<Human>().immunityStats <= 100 && target.GetComponent<PlayerCondition>().isInfected == false)
+            {
+             
+                StartCoroutine(InfectedCDNorm());
+                IEnumerator InfectedCDNorm()
+                {
+                    yield return new WaitForSeconds(10);
+                    target.GetComponent<PlayerCondition>().isHealthy = false;
+                }
+                //target.GetComponent<PlayerCondition>().isHealthy = false;
+
+            }
+            if (target.GetComponent<Human>().immunityStats > 100 && target.GetComponent<Human>().immunityStats <= 150 && target.GetComponent<PlayerCondition>().isInfected == false)
+            {
+
+                StartCoroutine(InfectedCDStrong());
+                IEnumerator InfectedCDStrong()
+                {
+                    yield return new WaitForSeconds(15);
+                    target.GetComponent<PlayerCondition>().isHealthy = false;
+                }
+                //target.GetComponent<PlayerCondition>().isHealthy = false;
+
+            }
+
+            if (target.CompareTag("human") && target.GetComponent<Human>().immunityStats <= 10 && target.GetComponent<PlayerCondition>().isInfected == true)
+            {
+                StartCoroutine(DeathCD());
+                IEnumerator DeathCD()
+                {
+                    yield return new WaitForSeconds(20);
+                    target.GetComponent<PlayerCondition>().isDead = true;
+                }
+                //target.GetComponent<PlayerCondition>().isDead = true;
+
+            }
+
+            if (target.CompareTag("human") && target.GetComponent<Human>().immunityStats >= 120 && target.GetComponent<PlayerCondition>().isInfected == true)
+            {
+                StartCoroutine(CuredCD());
+                IEnumerator CuredCD()
+                {
+                    yield return new WaitForSeconds(15);
+                    target.GetComponent<PlayerCondition>().isHealthy = true;
+                    target.GetComponent<PlayerCondition>().isInfected = false;
+                    target.GetComponent<PlayerCondition>().canBeInfected = false;
+                }
+                //target.GetComponent<PlayerCondition>().isHealthy = true;
+                //target.GetComponent<PlayerCondition>().isInfected = false;
+                //target.GetComponent<PlayerCondition>().canBeInfected = false;
+
+            }
+
+
+            /* target.GetComponent<PlayerCondition>().UpdateCount(false); */
+
+        }
+    }
+
+    /* void UpdateCount(bool value)
+    {
+        if(value == false)
+        {
+            Manager.healthyCount = Manager.healthyCount - 1;
+            Manager.infectedCount = Manager.infectedCount + 1;
+            mG.txtHealthy.text = "Healthy: " + Manager.healthyCount;
+            mG.txtInfected.text = "Infected: " + Manager.infectedCount;
+
+        }
+    } */
+
+    public void Death()
+    {
+        Destroy(gameObject);
+        Instantiate(deadIcon, gameObject.transform.position, Quaternion.identity);
+        mG.IncrementDead();
+    }
+
+    public void Cured()
+    {
+        rend.color = colourCured;
+
+        mG.IncrementCured();
+    }
+
+    private IEnumerator InfectedCDWeak()
+    {
+        yield return new WaitForSeconds(5);
+
+    }
+    private IEnumerator InfectedCDNorm()
+    {
+        yield return new WaitForSeconds(10);
+
+    }
+
+    private IEnumerator DeathCD()
+    {
+        yield return new WaitForSeconds(20);
+    } 
+
+    private IEnumerator InfectedCDStrong()
+    {
+        yield return new WaitForSeconds(15);
+    }
+
+    private IEnumerator CuredCD()
+    {
+        yield return new WaitForSeconds(15);
+    }
+}
