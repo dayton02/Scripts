@@ -1,0 +1,30 @@
+public class Trigger : MonoBehaviour
+{
+    [SerializeField] 
+    private GameObject dialogue;
+    private BoxCollider2D trigger;
+
+    private void Start()
+    {
+        trigger = GetComponent<BoxCollider2D>();
+    }
+
+    public void TriggerDialogue()
+    {
+        dialogue.SetActive(true);
+    }
+    public bool DialogueActive()
+    {
+        return dialogue.activeInHierarchy;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == "Player" || other.tag == "Invulnerable")
+        {
+            trigger.enabled = false;
+            TriggerDialogue();
+            DialogueActive();
+        }
+    }
+}
